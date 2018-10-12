@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <QOpenGLWidget>
 
+enum Object_IDs{oTriangle, oRectangle, oNum};
+enum Attrib_IDs{vPosition, vColor, vTexture};
+
 class Widget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -16,6 +19,11 @@ protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+
+private:
+    GLuint m_VAOs[oNum];
+    GLuint m_VBOs[oNum];
+    GLuint m_program[oNum];
 };
 
 #endif // WIDGET_H
