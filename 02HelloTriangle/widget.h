@@ -3,6 +3,8 @@
 
 #include <GL/glew.h>
 #include <QOpenGLWidget>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
 enum Object_IDs{oTriangle, oRectangle, oNum};
 enum Attrib_IDs{vPosition, vColor, vTexture};
@@ -19,6 +21,8 @@ protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+    void mousePressEvent(QMouseEvent *e);
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     GLuint m_VAOs[oNum];

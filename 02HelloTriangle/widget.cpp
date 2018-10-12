@@ -6,6 +6,11 @@ Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
     this->setFixedSize(800, 600);
+    std::cout<<"-----------------MENU------------------------------"<<std::endl;
+    std::cout<<"1. 按ESC退出"<<std::endl;
+    std::cout<<"2. 按鼠标左键..."<<std::endl;
+    std::cout<<"3. 按鼠标右键..."<<std::endl;
+    std::cout<<"---------------------------------------------------"<<std::endl;
 }
 
 Widget::~Widget()
@@ -20,12 +25,11 @@ void Widget::initializeGL()
 
     glewExperimental = GL_TRUE;
     if(glewInit() != GLEW_OK){
-        std::cout << "initialize GLEW : NO" << std::endl;
+        std::cout << "failed to initialize GLEW" << std::endl;
         return;
-    }else{
-        std::cout << "initialize GLEW : OK" << std::endl;
     }
 
+    /* 顶点数据 */
     float vertices[] = {
         -0.5f, -0.5f, 0.0f, // left
          0.5f, -0.5f, 0.0f, // right
@@ -66,8 +70,28 @@ void Widget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw our first triangle
+    /* 绘制三角形 */
     glUseProgram(m_program[oTriangle]);
     glBindVertexArray(m_VAOs[oTriangle]);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
+void Widget::mousePressEvent(QMouseEvent *e)
+{
+    if(e->buttons() == Qt::LeftButton){
+
+    }else if(e->buttons() == Qt::RightButton){
+
+    }
+    this->update();
+}
+
+void Widget::keyPressEvent(QKeyEvent *e)
+{
+    switch(e->key()){
+        case Qt::Key_Escape: this->close(); break;
+        default: break;
+    }
 }
