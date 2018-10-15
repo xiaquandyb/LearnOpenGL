@@ -6,6 +6,9 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
+enum Object_IDs{oTriangle, oRectangle, oNum};
+enum Attrib_IDs{vPosition, vColor, vTexture};
+
 class Widget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -20,6 +23,14 @@ protected:
     void paintGL();
     void mousePressEvent(QMouseEvent *e);
     void keyPressEvent(QKeyEvent *e);
+
+private:
+    GLuint m_VAOs[oNum];
+    GLuint m_VBOs[oNum];
+    GLuint m_EBOs[oNum];
+    GLuint m_program[oNum];
+
+    bool m_polygonMode;
 };
 
 #endif // WIDGET_H

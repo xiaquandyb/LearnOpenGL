@@ -1,6 +1,8 @@
 ﻿#include "widget.h"
 #include <iostream>
 #include <loadShader.h>
+#include <QDir>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -11,6 +13,8 @@ Widget::Widget(QWidget *parent)
     std::cout<<"2. 按鼠标左键..."<<std::endl;
     std::cout<<"3. 按鼠标右键..."<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
+
+    QDir::setCurrent(QApplication::applicationDirPath());
 }
 
 Widget::~Widget()
@@ -53,8 +57,8 @@ void Widget::initializeGL()
 
     /* 着色器 */
     ShaderInfo shaders[] = {
-        {GL_VERTEX_SHADER, "Resource/shader/simple.vert"},
-        {GL_FRAGMENT_SHADER, "Resource/shader/simple.frag"},
+        {GL_VERTEX_SHADER, "../shader/simple.vert"},
+        {GL_FRAGMENT_SHADER, "../shader/simple.frag"},
         {GL_NONE, NULL}
     };
 
