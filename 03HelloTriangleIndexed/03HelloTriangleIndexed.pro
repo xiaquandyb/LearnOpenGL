@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-10-12T09:56:32
+# Project created by QtCreator 2018-10-15T10:42:03
 #
 #-------------------------------------------------
 
@@ -17,11 +17,11 @@ HEADERS  += widget.h
 
 
 ## 修改默认配置
-#TARGET = 02HelloTriangle
+#TARGET = 03HelloTriangleIndexed
 CONFIG(debug, debug|release){
-    TARGET = 02HelloTriangled
+    TARGET = 03HelloTriangleIndexedd
 }else{
-    TARGET = 02HelloTriangle
+    TARGET = 03HelloTriangleIndexed
 }
 
 ## 通用配置
