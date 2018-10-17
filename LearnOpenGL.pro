@@ -5,4 +5,5 @@ SUBDIRS += \
     02HelloTriangle \
     03HelloTriangleIndexed \
     04HelloShader \
-    05HelloTexture
+    05HelloTexture \
+    06HelloTransform
