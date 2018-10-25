@@ -8,4 +8,5 @@ SUBDIRS += \
     05HelloTexture \
     06HelloTransform \
     07HelloCoordinateSystem \
-    08HelloCamera
+    08HelloCamera \
+    09HelloFPSCameraClass
