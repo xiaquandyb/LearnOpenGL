@@ -1,6 +1,8 @@
 ﻿#include "widget.h"
 #include <iostream>
 #include <loadShader.h>
+#include <QDir>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent), m_greenValue(1.0), m_target(0)
@@ -11,6 +13,8 @@ Widget::Widget(QWidget *parent)
     std::cout<<"2. 按鼠标左键改变颜色强度"<<std::endl;
     std::cout<<"3. 按鼠标右键改变三角形颜色"<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
+
+    QDir::setCurrent(QApplication::applicationDirPath());
 }
 
 Widget::~Widget()

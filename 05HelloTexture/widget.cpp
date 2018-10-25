@@ -3,6 +3,8 @@
 #include <loadShader.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <QDir>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -13,6 +15,8 @@ Widget::Widget(QWidget *parent)
     std::cout<<"2. 按鼠标左键..."<<std::endl;
     std::cout<<"3. 按鼠标右键..."<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
+
+    QDir::setCurrent(QApplication::applicationDirPath());
 }
 
 Widget::~Widget()

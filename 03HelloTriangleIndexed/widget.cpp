@@ -1,6 +1,8 @@
 ﻿#include "widget.h"
 #include <iostream>
 #include <loadShader.h>
+#include <QDir>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent), m_polygonMode(false)
@@ -10,6 +12,8 @@ Widget::Widget(QWidget *parent)
     std::cout<<"1. 按ESC退出"<<std::endl;
     std::cout<<"2. 按鼠标左/右键改变线框模式"<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
+
+    QDir::setCurrent(QApplication::applicationDirPath());
 }
 
 Widget::~Widget()
