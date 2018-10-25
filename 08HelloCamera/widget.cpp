@@ -5,18 +5,35 @@
 #include <stb_image.h>
 #include <QDir>
 #include <QApplication>
+#include <QDebug>
 
 Widget::Widget(QWidget *parent)
-    : QOpenGLWidget(parent), m_transform(glm::mat4(1.0f)), m_angle(0)
+    : QOpenGLWidget(parent),
+      m_transform(glm::mat4(1.0f)),
+      m_angle(0),
+      m_lastPos(400.0f, 300.0f),
+      m_cameraPos(glm::vec3(0.0f, 0.0f, 3.0f)),
+      m_cameraFront(glm::vec3(0.0f, 0.0f, -1.0f)),
+      m_cameraUp(glm::vec3(0.0f, 1.0f, 0.0f)),
+      m_firstMouse(true),
+      m_yaw(-90.0f),
+      m_pitch(0.0f),
+      m_fov(45.0f)
 {
     this->setFixedSize(800, 600);
+
     std::cout<<"-----------------MENU------------------------------"<<std::endl;
     std::cout<<"1. 按ESC退出"<<std::endl;
     std::cout<<"2. 按鼠标左键旋转盒子"<<std::endl;
     std::cout<<"3. 按鼠标右键..."<<std::endl;
+    std::cout<<"4. 按WSAD移动摄像机"<<std::endl;
+    std::cout<<"5. 移动鼠标改变方向"<<std::endl;
+    std::cout<<"6. 鼠标滚轮进行缩放"<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
 
     QDir::setCurrent(QApplication::applicationDirPath());
+
+    this->setMouseTracking(true);
 }
 
 Widget::~Widget()
@@ -159,20 +176,6 @@ void Widget::initializeGL()
     glUniform1i(glGetUniformLocation(m_program[oRectangle], "uTexture1"), 0);
     glUniform1i(glGetUniformLocation(m_program[oRectangle], "uTexture2"), 1);
     /* ----------纹理----------end */
-
-    /* 传递转换矩阵至着色器 */
-//    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-
-//    model = glm::rotate(model, glm::radians(55.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(45.0f), 800.0f/600.0f, 0.1f, 100.0f);
-
-    glUseProgram(m_program[oRectangle]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void Widget::resizeGL(int w, int h)
@@ -205,6 +208,11 @@ void Widget::paintGL()
     glUseProgram(m_program[oRectangle]);
     glBindVertexArray(m_VAOs[oRectangle]);
 
+    glm::mat4 projection = glm::perspective(glm::radians(m_fov), 800.0f/600.0f, 0.1f, 100.0f);
+    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glm::mat4 view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
+    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "view"), 1, GL_FALSE, glm::value_ptr(view));
+
     for(int i = 0; i < 10; ++i)
     {
       glm::mat4 model = glm::mat4(1.0f);
@@ -213,7 +221,6 @@ void Widget::paintGL()
       glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "model"), 1, GL_FALSE, glm::value_ptr(model));
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -231,9 +238,81 @@ void Widget::mousePressEvent(QMouseEvent *e)
 
 void Widget::keyPressEvent(QKeyEvent *e)
 {
+    float cameraSpeed = 0.05f; // adjust accordingly
     switch(e->key()){
-        case Qt::Key_Escape: this->close(); break;
+        case Qt::Key_Escape:
+            this->close();
+            break;
+        case Qt::Key_W:
+            m_cameraPos += cameraSpeed * m_cameraFront;
+            break;
+        case Qt::Key_S:
+            m_cameraPos -= cameraSpeed * m_cameraFront;
+            break;
+        case Qt::Key_A:
+            m_cameraPos -= glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
+            break;
+        case Qt::Key_D:
+            m_cameraPos += glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
+            break;
         default: break;
     }
+    this->update();
+}
+
+void Widget::mouseMoveEvent(QMouseEvent *e)
+{
+    QPointF moveLen;
+    if(m_firstMouse)
+    {
+        m_lastPos = e->pos();
+        m_firstMouse = false;
+        return;
+    }
+    moveLen = e->pos() - m_lastPos;
+    if(!(moveLen.x() >= 5.0f ||
+         moveLen.x() <= -5.0f ||
+         moveLen.y() >= 5.0f ||
+         moveLen.y() <= -5.0f))
+    {
+        return;
+    }
+    m_lastPos = e->pos();
+
+    float sensitivity = 0.05;
+    moveLen *= sensitivity;
+
+    m_yaw += moveLen.x();
+    m_pitch -= moveLen.y();
+    if(m_pitch > 89.0f)
+    {
+        m_pitch = 89.0f;
+    }
+    if(m_pitch < -89.0f)
+    {
+        m_pitch = -89.0f;
+    }
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
+    front.y = sin(glm::radians(m_pitch));
+    front.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
+    m_cameraFront = glm::normalize(front);
+
+    this->update();
+}
+
+void Widget::wheelEvent(QWheelEvent *e)
+{
+    m_fov += e->delta()/120.0f;
+    if(m_fov <= 1.0f)
+    {
+      m_fov = 1.0f;
+    }
+    if(m_fov >= 45.0f)
+    {
+      m_fov = 45.0f;
+    }
+    this->update();
 }
 

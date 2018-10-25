@@ -7,4 +7,5 @@ SUBDIRS += \
     04HelloShader \
     05HelloTexture \
     06HelloTransform \
-    07HelloCoordinateSystem
+    07HelloCoordinateSystem \
+    08HelloCamera
