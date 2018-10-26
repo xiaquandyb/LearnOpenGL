@@ -84,9 +84,9 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton){
 
-    }else if(e->buttons() == Qt::RightButton){
+    }else if(e->button() == Qt::RightButton){
 
     }
     this->update();

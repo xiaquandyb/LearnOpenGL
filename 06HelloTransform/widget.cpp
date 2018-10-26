@@ -162,13 +162,13 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton){
 //        m_transform = glm::translate(m_transform, glm::vec3(0.5f, -0.5f, 0.0f));
         m_transform = glm::rotate(m_transform, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         /* 传递转换矩阵至着色器 */
         glUseProgram(m_program[oRectangle]);
         glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "uTransform"), 1, GL_FALSE, glm::value_ptr(m_transform));
-    }else if(e->buttons() == Qt::RightButton){
+    }else if(e->button() == Qt::RightButton){
 
     }
     this->update();

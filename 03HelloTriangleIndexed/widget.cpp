@@ -102,9 +102,9 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton){
         m_polygonMode = true;
-    }else if(e->buttons() == Qt::RightButton){
+    }else if(e->button() == Qt::RightButton){
         m_polygonMode = false;
     }
     this->update();

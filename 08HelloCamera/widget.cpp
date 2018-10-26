@@ -15,7 +15,6 @@ Widget::Widget(QWidget *parent)
       m_cameraPos(glm::vec3(0.0f, 0.0f, 3.0f)),
       m_cameraFront(glm::vec3(0.0f, 0.0f, -1.0f)),
       m_cameraUp(glm::vec3(0.0f, 1.0f, 0.0f)),
-      m_firstMouse(true),
       m_yaw(-90.0f),
       m_pitch(0.0f),
       m_fov(45.0f)
@@ -25,10 +24,9 @@ Widget::Widget(QWidget *parent)
     std::cout<<"-----------------MENU------------------------------"<<std::endl;
     std::cout<<"1. 按ESC退出"<<std::endl;
     std::cout<<"2. 按鼠标左键旋转盒子"<<std::endl;
-    std::cout<<"3. 按鼠标右键..."<<std::endl;
+    std::cout<<"3. 按鼠标右键移动鼠标改变方向"<<std::endl;
     std::cout<<"4. 按WSAD移动摄像机"<<std::endl;
-    std::cout<<"5. 移动鼠标改变方向"<<std::endl;
-    std::cout<<"6. 鼠标滚轮进行缩放"<<std::endl;
+    std::cout<<"5. 鼠标滚轮进行缩放"<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
 
     QDir::setCurrent(QApplication::applicationDirPath());
@@ -227,11 +225,11 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton){
         ++m_angle;
         m_angle= m_angle%12;
-    }else if(e->buttons() == Qt::RightButton){
-
+    }else if(e->button() == Qt::RightButton){
+        m_lastPos = e->pos();
     }
     this->update();
 }
@@ -262,44 +260,42 @@ void Widget::keyPressEvent(QKeyEvent *e)
 
 void Widget::mouseMoveEvent(QMouseEvent *e)
 {
-    QPointF moveLen;
-    if(m_firstMouse)
+    if(e->buttons() & Qt::RightButton)
     {
+        QPointF moveLen;
+
+        moveLen = e->pos() - m_lastPos;
+        if(!(moveLen.x() >= 5.0f ||
+             moveLen.x() <= -5.0f ||
+             moveLen.y() >= 5.0f ||
+             moveLen.y() <= -5.0f))
+        {
+            return;
+        }
         m_lastPos = e->pos();
-        m_firstMouse = false;
-        return;
-    }
-    moveLen = e->pos() - m_lastPos;
-    if(!(moveLen.x() >= 5.0f ||
-         moveLen.x() <= -5.0f ||
-         moveLen.y() >= 5.0f ||
-         moveLen.y() <= -5.0f))
-    {
-        return;
-    }
-    m_lastPos = e->pos();
 
-    float sensitivity = 0.05;
-    moveLen *= sensitivity;
+        float sensitivity = 0.05;
+        moveLen *= sensitivity;
 
-    m_yaw += moveLen.x();
-    m_pitch -= moveLen.y();
-    if(m_pitch > 89.0f)
-    {
-        m_pitch = 89.0f;
+        m_yaw -= moveLen.x();
+        m_pitch += moveLen.y();
+        if(m_pitch > 89.0f)
+        {
+            m_pitch = 89.0f;
+        }
+        if(m_pitch < -89.0f)
+        {
+            m_pitch = -89.0f;
+        }
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
+        front.y = sin(glm::radians(m_pitch));
+        front.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
+        m_cameraFront = glm::normalize(front);
+
+        this->update();
     }
-    if(m_pitch < -89.0f)
-    {
-        m_pitch = -89.0f;
-    }
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
-    front.y = sin(glm::radians(m_pitch));
-    front.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
-    m_cameraFront = glm::normalize(front);
-
-    this->update();
 }
 
 void Widget::wheelEvent(QWheelEvent *e)

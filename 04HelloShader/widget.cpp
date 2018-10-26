@@ -119,7 +119,7 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *e)
 {
-    if(e->buttons() == Qt::LeftButton){
+    if(e->button() == Qt::LeftButton){
         m_greenValue -= 0.1f;
         if(m_greenValue < 0.0f){
             m_greenValue = 1.0f;
@@ -128,7 +128,7 @@ void Widget::mousePressEvent(QMouseEvent *e)
         glUniform4f(glGetUniformLocation(m_program[oGreenTriangle], "uColor"),
                 0.0f, m_greenValue, 0.0f, 1.0f);
         glUseProgram(0);
-    }else if(e->buttons() == Qt::RightButton){
+    }else if(e->button() == Qt::RightButton){
         if(m_target == oGreenTriangle)
         {
             m_target = oColorTriangle;

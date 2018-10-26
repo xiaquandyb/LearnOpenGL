@@ -9,4 +9,5 @@ SUBDIRS += \
     06HelloTransform \
     07HelloCoordinateSystem \
     08HelloCamera \
-    09HelloFPSCameraClass
+    09HelloFPSCameraClass \
+    10HelloColors

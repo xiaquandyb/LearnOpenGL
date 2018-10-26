@@ -42,7 +42,6 @@ private:
     glm::vec3 m_cameraFront;
     glm::vec3 m_cameraUp;
     QPointF m_lastPos;
-    bool m_firstMouse;
     float m_yaw;
     float m_pitch;
     float m_fov;
