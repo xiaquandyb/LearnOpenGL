@@ -9,7 +9,6 @@
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent),
-      m_angle(0),
       m_lastPos(400.0f, 300.0f),
       m_glCamera_FPS(glm::vec3(0.0f, 0.0f, 3.0f))
 {
@@ -17,10 +16,10 @@ Widget::Widget(QWidget *parent)
 
     std::cout<<"-----------------MENU------------------------------"<<std::endl;
     std::cout<<"1. 按ESC退出"<<std::endl;
-    std::cout<<"2. 按鼠标左键旋转盒子"<<std::endl;
+    std::cout<<"2. 按鼠标左键改变光源颜色"<<std::endl;
     std::cout<<"3. 按鼠标右键移动鼠标改变方向"<<std::endl;
     std::cout<<"4. 按WSAD移动摄像机"<<std::endl;
-    std::cout<<"5. 鼠标滚轮进行缩放"<<std::endl;
+    std::cout<<"5. 按鼠标滚轮进行缩放"<<std::endl;
     std::cout<<"---------------------------------------------------"<<std::endl;
 
     QDir::setCurrent(QApplication::applicationDirPath());
@@ -93,7 +92,6 @@ void Widget::initializeGL()
     /* 生成各对象 */
     glGenVertexArrays(oNum, m_VAOs);
     glGenBuffers(oNum, m_VBOs);
-    glGenTextures(tNum, m_texs);
 
     /* ----------顶点属性----------begin */
     glBindVertexArray(m_VAOs[oRectangle]);
@@ -103,71 +101,37 @@ void Widget::initializeGL()
 
     glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
     glEnableVertexAttribArray(vPosition);
-    glVertexAttribPointer(vTexture, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(vTexture);
+//    glVertexAttribPointer(vTexture, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+//    glEnableVertexAttribArray(vTexture);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     /* ----------顶点属性----------end */
 
     /* 着色器 */
-    ShaderInfo shaders[] = {
-        {GL_VERTEX_SHADER, "../shader/shader5.vert"},
-        {GL_FRAGMENT_SHADER, "../shader/shader5.frag"},
+    ShaderInfo shaders1[] = {
+        {GL_VERTEX_SHADER, "../shader/shader6.vert"},
+        {GL_FRAGMENT_SHADER, "../shader/shader6.frag"},
         {GL_NONE, NULL}
     };
-    m_program[oRectangle] = loadShaders(shaders);
+    m_program[pObj1] = loadShaders(shaders1);
+    ShaderInfo shaders2[] = {
+        {GL_VERTEX_SHADER, "../shader/shader6.vert"},
+        {GL_FRAGMENT_SHADER, "../shader/light.frag"},
+        {GL_NONE, NULL}
+    };
+    m_program[pLight] = loadShaders(shaders2);
 
-    /* ----------纹理----------begin */
-    glBindTexture(GL_TEXTURE_2D, m_texs[tContainer]);
+    glUseProgram(m_program[pObj1]);
+    glUniform3f(glGetUniformLocation(m_program[pObj1], "objectColor"), 1.0f, 0.5f, 0.31f);
+    glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 1.0f, 1.0f, 1.0f);
+//    glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 0.0f, 1.0f, 0.0f);
+//    glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 0.33f, 0.42f, 0.18f);
 
-    /* 为当前绑定的纹理对象设置环绕、过滤方式 */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    /* 加载并生成纹理 */
-    int texW, texH, texChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("../Resources/textures/container.jpg", &texW, &texH, &texChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texW, texH, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-
-    glBindTexture(GL_TEXTURE_2D, m_texs[tAwesomeface]);
-
-    /* 为当前绑定的纹理对象设置环绕、过滤方式 */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    /* 加载并生成纹理 */
-    data = stbi_load("../Resources/textures/awesomeface.png", &texW, &texH, &texChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texW, texH, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-    glUseProgram(m_program[oRectangle]);
-    glUniform1i(glGetUniformLocation(m_program[oRectangle], "uTexture1"), 0);
-    glUniform1i(glGetUniformLocation(m_program[oRectangle], "uTexture2"), 1);
-    /* ----------纹理----------end */
+    glUseProgram(m_program[pLight]);
+    glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 1.0f, 1.0f, 1.0f);
+//    glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 0.0f, 1.0f, 0.0f);
+//    glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 0.33f, 0.42f, 0.18f);
 }
 
 void Widget::resizeGL(int w, int h)
@@ -180,39 +144,40 @@ void Widget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.3f, 0.3f, 2.0f)
     };
 
-    /* 绘制 */
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_texs[tContainer]);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_texs[tAwesomeface]);
-    glUseProgram(m_program[oRectangle]);
-    glBindVertexArray(m_VAOs[oRectangle]);
-
     glm::mat4 projection = glm::perspective(glm::radians(m_glCamera_FPS.Zoom), 800.0f/600.0f, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glm::mat4 view = m_glCamera_FPS.GetViewMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glm::mat4 model = glm::mat4(1.0f);
 
-    for(int i = 0; i < 10; ++i)
-    {
-      glm::mat4 model = glm::mat4(1.0f);
-      model = glm::translate(model, cubePositions[i]);
-      model = glm::rotate(model, glm::radians((i+m_angle)*30.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-      glUniformMatrix4fv(glGetUniformLocation(m_program[oRectangle], "model"), 1, GL_FALSE, glm::value_ptr(model));
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    /* 绘制光源 */
+    glUseProgram(m_program[pLight]);
+    glBindVertexArray(m_VAOs[oRectangle]);
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pLight], "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pLight], "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, cubePositions[1]);
+    model = glm::scale(model, glm::vec3(0.2f));
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pLight], "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+
+    /* 绘制物体 */
+    glUseProgram(m_program[pObj1]);
+    glBindVertexArray(m_VAOs[oRectangle]);
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pObj1], "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pObj1], "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, cubePositions[0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_program[pObj1], "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
     glBindVertexArray(0);
     glUseProgram(0);
 }
@@ -220,8 +185,31 @@ void Widget::paintGL()
 void Widget::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::LeftButton){
-        ++m_angle;
-        m_angle= m_angle%12;
+        static int index = 0;
+        index = ++index%3;
+        switch(index)
+        {
+        case 0:
+            glUseProgram(m_program[pObj1]);
+            glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 1.0f, 1.0f, 1.0f);
+            glUseProgram(m_program[pLight]);
+            glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 1.0f, 1.0f, 1.0f);
+            break;
+        case 1:
+            glUseProgram(m_program[pObj1]);
+            glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 0.0f, 1.0f, 0.0f);
+            glUseProgram(m_program[pLight]);
+            glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 0.0f, 1.0f, 0.0f);
+            break;
+        case 2:
+            glUseProgram(m_program[pObj1]);
+            glUniform3f(glGetUniformLocation(m_program[pObj1], "lightColor"), 0.33f, 0.42f, 0.18f);
+            glUseProgram(m_program[pLight]);
+            glUniform3f(glGetUniformLocation(m_program[pLight], "lightColor"), 0.33f, 0.42f, 0.18f);
+            break;
+        default:
+            break;
+        }
     }else if(e->button() == Qt::RightButton){
         m_lastPos = e->pos();
     }
