@@ -10,4 +10,5 @@ SUBDIRS += \
     07HelloCoordinateSystem \
     08HelloCamera \
     09HelloFPSCameraClass \
-    10HelloColors
+    10HelloColors \
+    11HelloBasicLighting
